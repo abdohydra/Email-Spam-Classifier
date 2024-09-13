@@ -23,13 +23,11 @@ def preprocess_text(text):
 
 # Load dataset
 spam_data = pd.read_csv('spam12.csv', encoding='latin-1')
-# Remove unwanted columns and clean up data
-spam_data.columns = spam_data.columns.str.strip()  # Remove leading/trailing spaces from column names
-spam_data = spam_data[['label', 'email']]  # Retain only 'label' and 'email' columns
-# Preprocess email content
+
+spam_data.columns = spam_data.columns.str.strip()  s
+spam_data = spam_data[['label', 'email']]  #  only label and email
 spam_data['processed'] = spam_data['email'].apply(preprocess_text)
 
-# Functions to calculate TF, IDF, and TF-IDF
 def tf(datas):
     tflistforechemail = []
     for data in datas:
@@ -59,7 +57,6 @@ def tf_idf(df, idf_values):
         dfidfvalue["label"] = label
         listofdic.append(dfidfvalue)
     return listofdic
-# Functions to calculate prior and likelihood probabilities
 def prior_probability(datas, key1, key2):
     total = len(datas)
     class_counts = {key1: 0, key2: 0}
@@ -101,17 +98,17 @@ def predict(email, prior, likely, key1, key2):
 
     return key1 if score1 > score2 else key2
 
-# Split the data into training and test sets
+
 train_spam, test_spam = train_test_split(spam_data.to_dict(orient='records'), test_size=0.2, random_state=42)
 
-# Training Naive Bayes classifier
+
 tf_train_spam = tf(train_spam)
 idf_train_spam = idf(train_spam)
 tfidf_train_spam = tf_idf(tf_train_spam, idf_train_spam)
 prior_train_spam = prior_probability(train_spam, "spam", "ham")
 likelihood_train_spam = likelihoods(tfidf_train_spam, "spam", "ham")
 
-# Compute metrics
+# metrics
 def compute_metrics(test_data):
     y_true = [data['label'] for data in test_data]
     y_pred = [predict(preprocess_text(data['email']), prior_train_spam, likelihood_train_spam, 'spam', 'ham') for data in test_data]
@@ -128,11 +125,9 @@ accuracy, precision, recall, f1 = compute_metrics(test_spam)
 
 @app.route('/')
 def home():
-    # Retrieve the prediction from query parameters if it exists
+ 
     prediction = request.args.get('prediction')
 
-    # Render the page with the prediction
-    # If there's a prediction, redirect to remove it from the URL after rendering
     if prediction:
         return render_template('index.html',
                                prediction=prediction,
@@ -141,7 +136,6 @@ def home():
                                recall=recall,
                                f1=f1)
     else:
-        # Render normally if no prediction exists
         return render_template('index.html',
                                prediction=None,
                                accuracy=accuracy,
@@ -154,7 +148,6 @@ def home():
 def classify_email():
     email_content = request.form.get('email_content')
     if email_content:
-        # Process the email content and classify it
         processed_email = preprocess_text(email_content)
         result = predict(processed_email, prior_train_spam, likelihood_train_spam, 'spam', 'ham')
         return redirect(url_for('home', prediction=result))
