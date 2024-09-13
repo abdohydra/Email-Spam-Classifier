@@ -14,14 +14,14 @@ nltk.download('stopwords')
 stemmer = PorterStemmer()
 stop_words = set(stopwords.words('english'))
 
-# Preprocess text function
+# Preprocess 
 def preprocess_text(text):
     text = text.lower()
     words = word_tokenize(text)
     filtered_words = [stemmer.stem(word) for word in words if word.isalpha() and word not in stop_words]
     return ' '.join(filtered_words)
 
-# Load dataset
+# dataset
 spam_data = pd.read_csv('spam12.csv', encoding='latin-1')
 
 spam_data.columns = spam_data.columns.str.strip()  s
